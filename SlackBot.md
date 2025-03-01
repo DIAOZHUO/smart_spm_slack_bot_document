@@ -1,159 +1,185 @@
-# Slack Botの基本説明
+# Basic Explanation of the Slack Bot
 
-## Botの役割
-slackの特定なchannelにて, 以下の機能を実現します. 
+## Role of the Bot
+The bot operates in a specific Slack channel and provides the following functionalities:
 
-- STMのコントローラをリモートします. 具体的に, 
-LabviewRemoteManagerを通して, LabviewRemoteManager.RemoteDataTypeに書いてある変数のgetとsetします. 
-  
-- 自然言語エンジンによる会話機能. (クリスマスなどの時期に実験者の寂しい心を慰めます)
+- **Remote Control of the STM Controller**  
+  Specifically, it interacts with `LabviewRemoteManager` by getting and setting variables defined in `LabviewRemoteManager.RemoteDataType`.
 
-## Slackに投稿するメッセージのタイプ
-ユーザーさんがchannelに投稿するメッセージは, <u>会話タイプ</u>のメッセージと<u>リモートコマンドタイプ</u>のメッセージがあります. 
-会話タイプは普通に投稿すればいいのですが, リモートコマンドタイプは, 
+- **Natural Language Conversation Feature**  
+  The bot can engage in casual conversation using a natural language engine (e.g., to provide companionship for researchers during holidays like Christmas).
 
-`command_type@@@variable`
-
-みたいな感じで書きます. 文章に`@@@`が含まれると, リモートコマンドタイプとして処理します. 
-
-## Botのリアクション
-slackの特定なchannelにて, botはユーザーさんのメッセージに以下のスタンプをつけます. 
-
-- :eyes: : lineの既読と同じ意味です. 
-  もしこのスタンプがつけられていない場合, Botがofflineになっているか, useridがbanされているかの状態になります. 
-
-- :two_hearts: : Botはそのメッセージを会話だと認識して処理しました. 
-
-- :sparkles: : Botはそのメッセージをリモートコマンドだと認識して処理しました. 
-
-- :broken_heart: : Botはそのメッセージをリモートコマンドだと認識して処理したが, エラーが起こりました. 
-
-
-
-## リモートコマンド
-
-繰り返しますと, リモートコマンドタイプは, 
+## Types of Messages Posted in Slack
+Users can post two types of messages in the channel:  
+- **Conversation Messages**: Regular messages that do not require any special formatting.  
+- **Remote Command Messages**: These must be formatted as follows:
 
 `command_type@@@variable`
 
-として, `command_type`と`variable`の２つの部分で構成されています. 
-送ってきたメッセージの改行は無視されますので, 一行一行づつ送ってください. 
-現在公開できる`command_type`は`get`と`set`の２種類です.　
 
-|  command_type  |  役割  |
-| ---- | ---- |
-|  get  |  変数を取得します  |
-|  set  |  変数を変えます  |
-|  file  |  ".pkl"のファイルを送ります  |
-|  help  |  使える変数をリストアップします  |
 
-##### 1. Get Command
+If a message contains `@@@`, it is recognized as a remote command.
+
+## Bot Reactions
+In the designated Slack channel, the bot reacts to user messages with specific emojis:
+
+- :eyes: – Similar to the "read" indicator in LINE. If this reaction is missing, the bot is either offline or the user ID is banned.  
+- :two_hearts: – The bot recognized and processed the message as a conversation.  
+- :sparkles: – The bot recognized and processed the message as a remote command.  
+- :broken_heart: – The bot attempted to process the message as a remote command but encountered an error.  
+
+---
+
+## Remote Commands
+
+As mentioned earlier, remote command messages follow this format:
+
+
+`command_type@@@variable`
+
+
+
+Each command consists of `command_type` and `variable`.  
+Line breaks in messages are ignored, so commands must be sent one per line.  
+Currently, the available `command_type` options are:
+
+| Command Type | Function |
+|-------------|----------|
+| `get`  | Retrieves a variable |
+| `set`  | Modifies a variable |
+| `file` | Sends a `.pkl` file |
+| `help` | Lists available variables |
+
+### 1. Get Command
+
+
 ```
 get@@@varname
 ```
 
 
-varnameはLabviewRemoteManager.RemoteDataTypeやRemoteDataTypeに対応するクラスのメンバー変数です. 
-例えば, 
-  
+`varname` corresponds to a member variable within `LabviewRemoteManager.RemoteDataType` or its related classes.  
+For example:  
+
+
 `get@@@PythonScanParam`
 
-はPythonScanParamのクラス内の全てのメンバー変数を返します. PythonScanParamのクラス内Aux2ScanSizeという変数がありますが, 
+
+
+returns all member variables of the `PythonScanParam` class.  
+
+If a specific variable within `PythonScanParam` exists, such as `Aux2ScanSize`, the following command:
+
+
+
 
 `get@@@Aux2ScanSize`
 
-はその変数だけ返します. 
 
-##### 2. Set Command
+returns only that variable.
+
+---
+
+### 2. Set Command
+
 ```
 set@@@varname=value
 set@@@varname=json_str 
 ```
 
-例えば, 
+
+For example:  
 
 `set@@@PythonScanParam={"Aux1ScanSize"=256, "Aux2ScanSize"=256}`
 
 `set@@@Aux2ScanSize=256`
 
-みたいなコマンドがあります. <u>まとめたクラス</u>(PythonScanParam, StageConfigure, ScanDataHeader)では, =の後ろはjsonの文字列を与えれば, jsonで指定した変数は変更されます. 
-<u>普通の変数</u>では, `var_name=var`みたいな感じで送ります. 
 
-##### 3. File Command
+For **structured classes** (`PythonScanParam`, `StageConfigure`, `ScanDataHeader`), values should be provided as a JSON string to modify specific variables.  
+For **individual variables**, use the `var_name=value` format.
+
+---
+
+### 3. File Command
+
 ```
 file@@@path_to_file
 ```
 
 `file@@@E:\LabviewProject\Labview-SPMController\python\smart_spm\Datas\001_20220114_test`
 
-みたいに<u>拡張子つけず</u>にファイルパスを指定します. ファイルパスはbotがスキャン終了後画像と一緒に投稿しますので,
-それをコピーすればよいでしょう.
 
 
-##### 4. help Command
+Specify the **file path without an extension**.  
+The file, along with scan results, will be posted in Slack once scanning is complete. You can copy the file path from there.
+
+---
+
+### 4. Help Command
+
 ```
 help@@@
 ```
 
-これは変数(varname)の一覧を動的に送ってくれます. 
-下の変数の一覧表はこのドキュメントを更新しないと変わらないが, 
-help commandの表示は常に最新の変数の一覧です.
 
 
-## 変数の一覧表
+This dynamically retrieves and lists available variables.  
+Unlike the variable list in this document, which requires manual updates, the `help` command always reflects the latest variable set.
 
-LabviewRemoteManager.RemoteDataTypeに含む変数
+---
 
-|  variable_type  |  説明  |
-| ---- | ---- |
-|  PythonScanParam  |  まとめたクラス  |
-|  StageConfigure  |  まとめたクラス  |
-|  ScanDataHeader  |  まとめたクラス  |
-|  DriftX  |  X方向のドリフト(V/s)  |
-|  DriftY  |  Y方向のドリフト(V/s)  |
-|  DriftZ  |  Z方向のドリフト(V/s)  |
-|  DriftX_ADD  |  増加するX方向のドリフト(V/s)  |
-|  DriftY_ADD  |  増加するY方向のドリフト(V/s)  |
-|  DriftZ_ADD  |  増加するZ方向のドリフト(V/s)  |
-|  ScanEnabled  |  scan開始ボタン  |
-|  StageOffset_X_Tube  |  Tube ScannerのX軸offset(V)  |
-|  StageOffset_Y_Tube  |  Tube ScannerのY軸offset(V)  |
-|  StageOffset_X_HS  |  High Speed ScannerのX軸offset(V)  |
-|  StageOffset_Y_HS  |  High Speed ScannerのY軸offset(V)  |
-|  Go_Home  |  Unisoku Stage ControllerでZをhome positionに戻す  |
+## List of Variables
 
+### Variables in `LabviewRemoteManager.RemoteDataType`
 
-まとめた[クラスに含む変数](https://github.com/DIAOZHUO/SPMUtil/blob/main/SPMUtil/structures/scan_data_format.py)
+| Variable Type | Description |
+|--------------|------------|
+| `PythonScanParam` | Structured Class |
+| `StageConfigure` | Structured Class |
+| `ScanDataHeader` | Structured Class |
+| `DriftX` | Drift in X direction (V/s) |
+| `DriftY` | Drift in Y direction (V/s) |
+| `DriftZ` | Drift in Z direction (V/s) |
+| `DriftX_ADD` | Additional drift in X direction (V/s) |
+| `DriftY_ADD` | Additional drift in Y direction (V/s) |
+| `DriftZ_ADD` | Additional drift in Z direction (V/s) |
+| `ScanEnabled` | Scan start button |
+| `StageOffset_X_Tube` | Tube Scanner X-axis offset (V) |
+| `StageOffset_Y_Tube` | Tube Scanner Y-axis offset (V) |
+| `StageOffset_X_HS` | High-Speed Scanner X-axis offset (V) |
+| `StageOffset_Y_HS` | High-Speed Scanner Y-axis offset (V) |
+| `Go_Home` | Moves Z to the home position using the Unisoku Stage Controller |
 
-|  variable_type  |  説明  |
-| ---- | ---- |
-|  Sample_Bias  |    |
-|  Tube_Scanner_Offset_X  |    |
-|  Tube_Scanner_Offset_Y  |    |
-|  High_Speed_Scanner_Offset_X  |    |
-|  High_Speed_Scanner_Offset_Y  |    |
-|  Scan_Speed  |    |
-|  XY_Scan_Option  |    |
-|  Z_Scan_Option  |    |
-|  Aux1Pingpong  |    |
-|  Aux2Pingpong  |    |
-|  ZRotation  |    |
-|  Aux1MinVoltage  |    |
-|  Aux1MaxVoltage  |    |
-|  Aux2MinVoltage  |    |
-|  Aux2MaxVoltage  |    |
-|  Aux1ScanSize  |    |
-|  Aux2ScanSize  |    |
-|  Aux1Type  |    |
-|  Aux2Type  |    |
-|  Xtilt  |    |
-|  Ytilt  |    |
-|  Applytilt  |    |
-|  Date  |    |
-|  Time_Start_Scan  |    |
-|  Time_End_Scan  |    |
-|  Scan_Method  |    |
+### [Variables in Structured Classes](https://github.com/DIAOZHUO/SPMUtil/blob/main/SPMUtil/structures/scan_data_format.py)
 
+| Variable Type | Description |
+|--------------|------------|
+| `Sample_Bias` |  |
+| `Tube_Scanner_Offset_X` |  |
+| `Tube_Scanner_Offset_Y` |  |
+| `High_Speed_Scanner_Offset_X` |  |
+| `High_Speed_Scanner_Offset_Y` |  |
+| `Scan_Speed` |  |
+| `XY_Scan_Option` |  |
+| `Z_Scan_Option` |  |
+| `Aux1Pingpong` |  |
+| `Aux2Pingpong` |  |
+| `ZRotation` |  |
+| `Aux1MinVoltage` |  |
+| `Aux1MaxVoltage` |  |
+| `Aux2MinVoltage` |  |
+| `Aux2MaxVoltage` |  |
+| `Aux1ScanSize` |  |
+| `Aux2ScanSize` |  |
+| `Aux1Type` |  |
+| `Aux2Type` |  |
+| `Xtilt` |  |
+| `Ytilt` |  |
+| `Applytilt` |  |
+| `Date` |  |
+| `Time_Start_Scan` |  |
+| `Time_End_Scan` |  |
+| `Scan_Method` |  |
 
-
+This document provides an overview of the Slack bot functionalities, command structures, and available variables for remote control.
 
