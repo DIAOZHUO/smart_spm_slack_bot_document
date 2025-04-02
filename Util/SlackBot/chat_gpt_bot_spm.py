@@ -3,8 +3,8 @@ from Util.exception import get_exception_message
 from Util.SlackBot.file_io import get_file_name, DataSerializer
 from api_key import *
 
-from openai import OpenAI
-client = OpenAI(
+from openai import OpenAI as CloseAI
+client = CloseAI(
   api_key=open_ai_key  # this is also the default, it can be omitted
 )
 
@@ -33,17 +33,17 @@ lang_dict = {"en": "English", "zh": "Chinese", "ja": "Japanese"}
 
 
 
-def chat_openai(text,
-                messages=None,
-                settings="",
-                max_tokens=2000,
-                temperature=1.2,
-                top_p=.1,
-                presence_penalty=0.,
-                frequency_penalty=0.,
-                language_code=None,
-                user_id=None,
-                build_histroy=True):
+def chat_closeai(text,
+                 messages=None,
+                 settings="",
+                 max_tokens=2000,
+                 temperature=1.2,
+                 top_p=.1,
+                 presence_penalty=0.,
+                 frequency_penalty=0.,
+                 language_code=None,
+                 user_id=None,
+                 build_histroy=True):
 
     messages = messages if messages is not None else []
     if settings == "" and not messages:
@@ -123,6 +123,6 @@ if __name__ == '__main__':
     # text = chat_openai(text="set sample bias to 0.5V and start scan", user_id="test_user", build_histroy=False)
     # text = chat_openai(text="探針をX方向10nmにずらして, スキャン範囲20x20nmで計測", user_id="test_user", build_histroy=False)
     # text = chat_openai(text="スキャン開始して", user_id="test_user", build_histroy=False)
-    text = chat_openai(text="find a good area to scan", user_id="test_user", build_histroy=False)
+    text = chat_closeai(text="find a good area to scan", user_id="test_user", build_histroy=False)
     print(text)
     # print(history_conversation_list)

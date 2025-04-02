@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-from Util.SlackBot.chat_gpt_bot_spm import chat_openai
+from Util.SlackBot.chat_gpt_bot_spm import chat_closeai
 from typing import Tuple, List
 
 from Framework.types.RemoteDataType import RemoteDataType
@@ -13,7 +13,7 @@ data_tree_list = list(LabviewRemoteManager.get_remote_command_tree()["data_tree"
 # data_tree_list = []
 # print(data_tree_list)
 def text2command(text: str, language_code: str=None) -> Tuple[str, str | List[Tuple[RemoteDataType, str]]]:
-    response = chat_openai(text, language_code=language_code)
+    response = chat_closeai(text, language_code=language_code)
     # print(response)
     # print("chatgpt respoinse", response)
     lines = response.split("\n")

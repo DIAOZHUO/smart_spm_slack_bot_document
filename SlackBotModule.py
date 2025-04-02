@@ -6,7 +6,7 @@ from slack_sdk.web.async_client import AsyncWebClient
 from slack_sdk.socket_mode.aiohttp import SocketModeClient
 from slack_sdk.socket_mode.response import SocketModeResponse
 from slack_sdk.socket_mode.request import SocketModeRequest
-from Util.SlackBot.chat_gpt_bot_spm import chat_openai as chat_openai
+from Util.SlackBot.chat_gpt_bot_spm import chat_closeai
 from Util.SlackBot.text2command_parser import text2command
 
 from enum import Enum
@@ -210,7 +210,7 @@ class SlackBotModule(BaseModule):
                     """
                     command = BotCommandType[s[0]]
                     if command == BotCommandType.chat:
-                        t = chat_openai(s[1], user_id=req.payload["event"]["channel"], language_code=detect_language(s[1]))
+                        t = chat_closeai(s[1], user_id=req.payload["event"]["channel"], language_code=detect_language(s[1]))
                         await self.send_message_async(t)
 
                     if command == BotCommandType.get:
